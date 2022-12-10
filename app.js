@@ -6,17 +6,31 @@ const app = new PIXI.Application({
     height: window.innerHeight
 });
 
-let objectsOnScreen = 2;
-let inventory = [];
+let inventory;
+let inventory2;
+let turn = 'player one';
 
 class Inventory extends PIXI.Sprite {
-    constructor() {
+    items
+    constructor(_offset) {
         super(PIXI.Texture.WHITE);
-        this.anchor.x = 0;
+        this.anchor.x = 0 - 1.05 * _offset;
         this.anchor.y = -1.3;
         this.height = 325;
-        this.width = 1450;
+        this.width = 700;
         app.stage.addChild(this);
+        this.items = [];
+    }
+    put(_food) {
+        let _row = 3 + Math.floor(this.items.length / 7);
+        let _col = this.items.length % 7;
+        if (turn == 'player two') _col += 7.35;
+        _food.height = 100;
+        _food.width = 100;
+        _food.anchor.x = -_col;
+        _food.anchor.y = -_row/0.7;
+        app.stage.addChild(_food);
+        this.items[this.items.length] = _food;
     }
 }
 
@@ -27,11 +41,25 @@ class BaseFood extends PIXI.Sprite {
         this.type = _type;
         this.attack = this.getStats(_type)[0];
         this.defense = this.getStats(_type)[1];
-        this.putOnScreen(_row, _col);
-        // console.log(this);
+        this.putInShop(_row, _col);
     }
 
-    putOnScreen(_row, _col) {
+    foodClicked() {
+        if (inventory.items.indexOf(this) != -1 ||
+            inventory2.items.indexOf(this) != -1) return; // stop if in an inventory
+
+        app.stage.removeChild(this);
+        if (turn == 'player one') {
+            inventory.put(this);
+            turn = 'player two';
+        }
+        else if (turn == 'player two') {
+            inventory2.put(this);
+            turn = 'player one';
+        }
+    }
+
+    putInShop(_row, _col) {
         this.anchor.x = -_col/0.95 - 0.37;
         this.anchor.y = -_row/0.95;
         this.height = 200;
@@ -39,24 +67,6 @@ class BaseFood extends PIXI.Sprite {
         this.interactive = true;
         this.on('mousedown', (e) => this.foodClicked(e));
         app.stage.addChild(this);
-    }
-
-    foodClicked() {
-        app.stage.removeChild(this);
-        const _col = 0;
-        const _row = 3;
-        this.height = 100;
-        this.width = 100;
-        this.anchor.x = -_col/2;
-        this.anchor.y = -_row/0.7;
-        app.stage.addChild(this);
-
-        inventory[inventory.length] = this;
-        objectsOnScreen--;
-        if (objectsOnScreen == 0) {
-            // console.log('all food has been purchased');
-        }
-        // console.log("inventory: ", inventory);
     }
 
     getStats (food) {
@@ -77,8 +87,8 @@ class BaseFood extends PIXI.Sprite {
 
 class CombinedFood {}
 
-
-let myInventory = new Inventory();
+inventory = new Inventory(0);
+inventory2 = new Inventory(1);
 
 let myBasil = new BaseFood('basil', 'resources/images/basil.png', 0, 0);
 let myBread = new BaseFood('bread', 'resources/images/bread.png', 0, 1);
@@ -89,3 +99,13 @@ let myMeatball = new BaseFood('meatball', 'resources/images/meatball.png', 0, 5)
 let myOlive = new BaseFood('olive', 'resources/images/olive.png', 1, 0);
 let myPasta = new BaseFood('pasta', 'resources/images/pasta.png', 1, 1);
 let myTomato = new BaseFood('tomato', 'resources/images/tomato.png', 1, 2);
+
+let myBasil2 = new BaseFood('basil', 'resources/images/basil.png', 0, 0);
+let myBread2 = new BaseFood('bread', 'resources/images/bread.png', 0, 1);
+let myBroccoli2 = new BaseFood('broccoli', 'resources/images/broccoli.png', 0, 2);
+let myCheese2 = new BaseFood('cheese', 'resources/images/cheese.png', 0, 3);
+let myGarlic2 = new BaseFood('garlic', 'resources/images/garlic.png', 0, 4);
+let myMeatball2 = new BaseFood('meatball', 'resources/images/meatball.png', 0, 5);
+let myOlive2 = new BaseFood('olive', 'resources/images/olive.png', 1, 0);
+let myPasta2 = new BaseFood('pasta', 'resources/images/pasta.png', 1, 1);
+let myTomato2 = new BaseFood('tomato', 'resources/images/tomato.png', 1, 2);
